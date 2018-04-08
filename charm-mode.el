@@ -5,6 +5,7 @@
     ("[\^\\|[:space:]]\".+\"[\$\\|[:space:]]" (0 font-lock-string-face))))
 (defconst charm-buffer "Charm REPL")
 (defconst charm-path "/usr/bin/charm")
+(defconst charm-process "charm-repl-process")
 
 
 (defun charm-enable-smm ()
@@ -29,17 +30,16 @@
   "Interpret a line of Charm in the Charm REPL."
   (interactive)
   (let ((charm-line (thing-at-point 'line t)))
-                                        ; make sure that we make the buffer in a new frame if it's not already there -- to avoid replacing our code with the repl
+                                        ;make sure that we make the buffer in a new frame if it's not already there -- to avoid replacing our code with the repl
     (when (null (get-buffer charm-buffer))
       (switch-to-buffer-other-window charm-buffer))
     (charm-repl)
-    (insert charm-line)
-    (comint-send-input)
+    (comint-simple-send (get-process charm-process) charm-line)
     (message charm-line)))
 
 (defun charm-repl-here ()
   "Open a Charm REPL in the Charm REPL buffer."
-  (make-comint-in-buffer "charm-repl-process" charm-buffer charm-path))
+  (make-comint-in-buffer charm-process charm-buffer charm-path))
 
 (defun charm-repl ()
   "Open a Charm REPL in a new or existing buffer."
